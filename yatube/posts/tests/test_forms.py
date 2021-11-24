@@ -132,8 +132,10 @@ class PostFormTests(TestCase):
                     self.assertIsInstance(form_fields, expected)
 
     def test_add_comments_authorized_user(self):
-        '''Проверяется комментирование постов авторизированным пользователем.'''
-        form_data ={ 'text': 'test_comment', 'author': self.user }
+        '''Проверяется комментирование постов
+           авторизированным пользователем.
+        '''
+        form_data = {'text': 'test_comment', 'author': self.user}
         response = self.authorized_client.post(self.POST_COMMENT_URL,
                                                data=form_data,
                                                follow=True)

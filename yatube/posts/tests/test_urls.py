@@ -85,7 +85,6 @@ class PostURLTests(TestCase):
             with self.subTest(url=url, client=client, finel_url=finel_url):
                 self.assertRedirects(client.get(url, follow=True), finel_url)
 
-
     # Проверяется вызываемые шаблоны для каждого адреса
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""

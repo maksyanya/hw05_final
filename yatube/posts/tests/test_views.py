@@ -4,7 +4,6 @@ import tempfile
 from django.core.cache import cache
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import response
 from django.test import Client
 from django.test import override_settings
 from django.test import TestCase
@@ -50,8 +49,12 @@ class PostPagesTests(TestCase):
                                                  description=DESCRIPTION_OTHER)
 
         cls.follower = User.objects.create(username='test_follower')
-        cls.PROFILE_FOLLOW_URL = reverse('posts:profile_follow', kwargs={'username': cls.follower})
-        cls.PROFILE_UNFOLLOW_URL = reverse('posts:profile_unfollow', kwargs={'username': cls.follower})
+        cls.PROFILE_FOLLOW_URL = reverse(
+            'posts:profile_follow',
+            kwargs={'username': cls.follower})
+        cls.PROFILE_UNFOLLOW_URL = reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': cls.follower})
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -180,7 +183,7 @@ class PostPagesTests(TestCase):
         response = self.authorized_client.get(FOLLOW_INDEX_URL)
         post = response.context['page_obj'][0]
         self.assertEqual(post, first_post)
-    
+
     def test_new_post_not_show_on_page_unfollowers(self):
         '''Новая запись пользователя не появляется в ленте тех,
            кто НЕ подписан на него.
@@ -201,6 +204,7 @@ class PostPagesTests(TestCase):
         response = self.follower_client.get(FOLLOW_INDEX_URL)
         posts = response.context['page_obj']
         self.assertEqual(len(posts), 0)
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod
