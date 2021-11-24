@@ -116,13 +116,12 @@ LANGUAGE_CODE = 'ru'
 
 
 TIME_ZONE = 'Europe/Istanbul'
- 
+
 USE_TZ = True
 
 USE_I18N = True
 
 USE_L10N = True
-
 
 
 # Static files (CSS, JavaScript, Images)
@@ -152,4 +151,4 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
-} 
+}

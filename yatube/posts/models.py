@@ -22,8 +22,6 @@ class Group(models.Model):
         verbose_name_plural = 'Группы'
 
 
-
-
 class Post(models.Model):
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
@@ -52,6 +50,7 @@ class Post(models.Model):
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
 
+
 class Comment(models.Model):
     post = models.ForeignKey(
         Post,
@@ -70,6 +69,7 @@ class Comment(models.Model):
         'Дата публикации',
         auto_now_add=True
     )
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
