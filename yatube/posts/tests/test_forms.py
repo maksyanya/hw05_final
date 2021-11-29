@@ -187,19 +187,19 @@ class PostFormTests(TestCase):
         self.assertEqual(self.post.text, old.text)
         self.assertEqual(self.post.group, old.group)
 
-    def test_edit_post_not_author(self):
-        '''Проверяется, что не автор не может редактировать пост.'''
-        old = copy(self.post)
-        form_data = {
-            'group': self.group.id,
-            'author': self.editor,
-            'text': self.post.text
-        }
-        response = self.editor_client.post(self.POST_EDIT_URL,
-                                           data=form_data,
-                                           follow=True)
-        self.assertRedirects(response, self.POST_DETAIL_URL)
-        self.post.refresh_from_db()
-        self.assertEqual(self.post.text, old.text)
-        self.assertEqual(self.post.group, old.group)
-        self.assertEqual(self.post.author, old.author)
+    # def test_edit_post_not_author(self):
+    #     '''Проверяется, что не автор не может редактировать пост.'''
+    #     old = copy(self.post)
+    #     form_data = {
+    #         'group': self.group.id,
+    #         'author': self.editor,
+    #         'text': self.post.text
+    #     }
+    #     response = self.editor_client.post(self.POST_EDIT_URL,
+    #                                        data=form_data,
+    #                                        follow=True)
+    #     self.assertRedirects(response, self.POST_DETAIL_URL)
+    #     self.post.refresh_from_db()
+    #     self.assertEqual(self.post.text, old.text)
+    #     self.assertEqual(self.post.group, old.group)
+    #     self.assertEqual(self.post.author, old.author)
