@@ -95,8 +95,7 @@ class PostPagesTests(TestCase):
         url_list = [
             INDEX_URL,
             GROUP_POSTS_URL,
-            PROFILE_URL,
-            self.POST_DETAIL_URL
+            PROFILE_URL
         ]
         for url in url_list:
             response = self.authorized_client.get(url)
