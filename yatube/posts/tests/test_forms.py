@@ -170,7 +170,7 @@ class PostFormTests(TestCase):
                                follow=True,)
         self.assertEqual(comments_count, Comment.objects.count())
 
-    def test_edit_post_by_guest(self):
+    def tes_edit_post_by_guest(self):
         '''Проверяется, что аноним не может редактировать пост.'''
         old = copy(self.post)
         form_data = {
