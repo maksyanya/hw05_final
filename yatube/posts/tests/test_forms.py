@@ -67,13 +67,6 @@ class PostFormTests(TestCase):
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
         cls.POST_COMMENT_URL = reverse('posts:add_comment', args=[cls.post.id])
 
-        cls.guest_client = Client()
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
-        cls.editor = User.objects.create(username='not_author')
-        cls.editor_client = Client()
-        cls.editor_client.force_login(cls.editor)
-
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -81,6 +74,12 @@ class PostFormTests(TestCase):
 
     def setUp(self):
         cache.clear()
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+        self.editor = User.objects.create(username='not_author')
+        self.editor_client = Client()
+        self.editor_client.force_login(self.editor)
         self.image = SimpleUploadedFile(
             name='small.gif',
             content=SMALL_GIF,

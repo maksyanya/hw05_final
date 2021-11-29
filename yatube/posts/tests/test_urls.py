@@ -38,14 +38,13 @@ class PostURLTests(TestCase):
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
 
-        cls.guest = Client()
-        cls.author_ = Client()
-        cls.author_.force_login(cls.author)
-        cls.another = Client()
-        cls.another.force_login(cls.not_author)
-
     def setUp(self):
         cache.clear()
+        self.guest = Client()
+        self.author_ = Client()
+        self.author_.force_login(self.author)
+        self.another = Client()
+        self.another.force_login(self.not_author)
 
     # Проверяется все страницы авторизованных/неавторизованных пользователей
     def test_all_url_all_user(self):

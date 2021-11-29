@@ -76,12 +76,6 @@ class PostPagesTests(TestCase):
         )
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
 
-        cls.guest_client = Client()
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.author)
-        cls.follower_client = Client()
-        cls.follower_client.force_login(cls.follower)
-
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -89,6 +83,11 @@ class PostPagesTests(TestCase):
 
     def setUp(self):
         cache.clear()
+        self.guest_client = Client()
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.author)
+        self.follower_client = Client()
+        self.follower_client.force_login(self.follower)
 
     def test_show_correct_context(self):
         '''Проверяется контекст шаблонов на соответствие.'''
