@@ -108,8 +108,7 @@ class PostFormTests(TestCase):
         '''Проверяется редактирование поста через форму на странице.'''
         form_data_new = {
             'text': self.post.text,
-            'group': self.group_new.id,
-            'image': self.image
+            'group': self.group_new.id
         }
         response = self.authorized_client.post(self.POST_EDIT_URL,
                                                data=form_data_new,
