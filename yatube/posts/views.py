@@ -40,13 +40,11 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts = author.posts.all()
     page_obj = get_page(request, posts)
-    following = request.user.is_authenticated and Follow.objects.filter(
-        user=request.user,
-        author=author).exists()
+    following = request.user.is_authenticated and author.following.exists()
     context = {
         'page_obj': page_obj,
         'author': author,
-        'following': following,
+        'following': following
     }
     return render(request, 'posts/profile.html', context)
 
@@ -125,15 +123,13 @@ def follow_index(request):
 def profile_follow(request, username):
     user = request.user
     author = get_object_or_404(User, username=username)
-    follow_check = Follow.objects.filter(author=author, user=user).exists()
-    if not follow_check and author != user:
+    if author != user:
         Follow.objects.create(user=user, author=author)
     return redirect('posts:profile', username=username)
 
 
 @login_required
 def profile_unfollow(request, username):
-    follower = get_object_or_404(User, username=username)
-    follower = get_object_or_404(Follow, author=follower, user=request.user)
-    follower.delete()
+    author = get_object_or_404(User, username=username)
+    get_object_or_404(Follow, author=author, user=request.user).delete()
     return redirect('posts:profile', username=username)

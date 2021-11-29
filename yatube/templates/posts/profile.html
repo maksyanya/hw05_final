@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% block title %} Профиль пользователя {{ author.username }} {% endblock %}
 {% block content %}
-{% include 'posts/includes/switcher.html' %}
   <div class="mb-5">        
     <h1>Все посты пользователя {{ author.username }} </h1>
     <h3>Всего постов: {{ author.posts.count }} </h3>
     <h4>Подписчиков: {{ author.following.count }} </h4>
     <h4>Подписок: {{ author.follower.count }} </h4>
-    {% if user != author and request.user.is_authenticated %}
+    {% if user != author and user.is_authenticated %}
       {% if following %}
         <a class="btn btn-lg btn-light" href="{% url 'posts:profile_unfollow' author.username %}" role="button">
           Отписаться
@@ -20,7 +19,7 @@
     {% endif %}
       <article>
         {% for post in page_obj %}
-          {% include 'posts/includes/profile_item.html' %}
+          {% include 'posts/includes/post.html' %}
         {% endfor %}
         </article>
         <hr>

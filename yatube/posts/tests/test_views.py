@@ -38,10 +38,8 @@ GROUP_POSTS_URL = reverse('posts:group_posts', kwargs={'slug': SLUG})
 PROFILE_URL = reverse('posts:profile', kwargs={'username': USERNAME})
 ANOTHER_GROUP = reverse('posts:group_posts', kwargs={'slug': SLUG_ANOTHER})
 FOLLOW_INDEX_URL = reverse('posts:follow_index')
-PROFILE_FOLLOW_URL = reverse('posts:profile_follow',
-                             kwargs={'username': FOLLOWER})
-PROFILE_UNFOLLOW_URL = reverse('posts:profile_unfollow',
-                               kwargs={'username': FOLLOWER})
+FOLLOW_URL = reverse('posts:profile_follow', kwargs={'username': FOLLOWER})
+UNFOLLOW_URL = reverse('posts:profile_unfollow', kwargs={'username': FOLLOWER})
 FOLLOW_INDEX_URL = reverse('posts:follow_index')
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -52,6 +50,11 @@ class PostPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.image = SimpleUploadedFile(
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
+        )
         cls.author = User.objects.create(username=USERNAME)
         cls.group = Group.objects.create(title=TITLE,
                                          slug=SLUG,
@@ -62,20 +65,14 @@ class PostPagesTests(TestCase):
 
         cls.follower = User.objects.create(username=FOLLOWER)
 
-        cls.uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=SMALL_GIF,
-            content_type='image/gif'
-        )
-
         cls.post = Post.objects.create(
             author=cls.author,
             group=cls.group,
             text=TEXT,
-            image=cls.uploaded,
+            image=cls.image,
         )
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
-
+        cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
         cls.guest_client = Client()
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.author)
@@ -95,7 +92,9 @@ class PostPagesTests(TestCase):
         url_list = [
             INDEX_URL,
             GROUP_POSTS_URL,
-            PROFILE_URL
+            PROFILE_URL,
+            self.POST_DETAIL_URL,
+            self.POST_EDIT_URL
         ]
         for url in url_list:
             response = self.authorized_client.get(url)
@@ -108,6 +107,7 @@ class PostPagesTests(TestCase):
             self.assertEqual(post.author, self.post.author)
             self.assertEqual(post.text, self.post.text)
             self.assertEqual(post.id, self.post.id)
+            self.assertEqual(post.image, self.post.image)
 
     def test_post_not_in_another_group(self):
         '''Проверяется, что пост не отображается в другой группе'''
@@ -145,20 +145,18 @@ class PostPagesTests(TestCase):
         '''Авторизованный пользователь может подписываться
            на других пользователей.
         '''
-        before_follow = Follow.objects.all().count()
-        self.authorized_client.get(PROFILE_FOLLOW_URL)
-        after_follow = Follow.objects.all().count()
-        self.assertNotEqual(before_follow, after_follow)
+        self.authorized_client.get(FOLLOW_URL)
+        follow = Follow.objects.filter(user=self.author, author=self.follower)
+        self.assertTrue(follow.exists())
 
     def test_authorized_user_can_unfollow_from_users(self):
         '''Авторизованный пользователь может отписывается
            от других пользователей.
         '''
         Follow.objects.create(user=self.author, author=self.follower)
-        before_unfollow = Follow.objects.all().count()
-        self.authorized_client.get(PROFILE_UNFOLLOW_URL)
-        after_unfollow = Follow.objects.all().count()
-        self.assertNotEqual(before_unfollow, after_unfollow)
+        self.authorized_client.get(UNFOLLOW_URL)
+        follow = Follow.objects.filter(user=self.author, author=self.follower)
+        self.assertFalse(follow.exists())
 
     def test_new_post_not_show_on_page_unfollowers(self):
         '''Новая запись пользователя не появляется в ленте тех,

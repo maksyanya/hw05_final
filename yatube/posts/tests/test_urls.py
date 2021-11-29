@@ -37,6 +37,7 @@ class PostURLTests(TestCase):
         )
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
+        cls.ADD_COMMENT_URL = reverse('posts:add_comment', args=[cls.post.id])
 
         cls.guest = Client()
         cls.author_ = Client()
@@ -60,7 +61,8 @@ class PostURLTests(TestCase):
             [UNEXIST_PAGE, self.guest, 404],
             [POST_CREATE_URL, self.guest, 302],
             [self.POST_EDIT_URL, self.guest, 302],
-            [self.POST_EDIT_URL, self.another, 302]
+            [self.POST_EDIT_URL, self.another, 302],
+            [FOLLOW_INDEX_URL, self.another, 200]
         ]
         for url, client, code in cases:
             with self.subTest(url=url, client=client, code=code):
@@ -77,7 +79,10 @@ class PostURLTests(TestCase):
              LOGIN + '?next=' + POST_CREATE_URL],
             [self.POST_EDIT_URL,
              self.guest,
-             LOGIN + '?next=' + self.POST_EDIT_URL]
+             LOGIN + '?next=' + self.POST_EDIT_URL],
+            [self.ADD_COMMENT_URL,
+             self.guest,
+             LOGIN + '?next=' + self.ADD_COMMENT_URL],
         ]
         for url, client, finel_url in cases:
             with self.subTest(url=url, client=client, finel_url=finel_url):
@@ -92,7 +97,8 @@ class PostURLTests(TestCase):
             PROFILE_URL: 'posts/profile.html',
             self.POST_DETAIL_URL: 'posts/post_detail.html',
             POST_CREATE_URL: 'posts/create_post.html',
-            self.POST_EDIT_URL: 'posts/create_post.html'
+            self.POST_EDIT_URL: 'posts/create_post.html',
+            FOLLOW_INDEX_URL: 'posts/follow.html'
         }
         for url, template in templates_url_names.items():
             with self.subTest(url=url):

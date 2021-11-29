@@ -54,13 +54,16 @@ class PostFormTests(TestCase):
             description=DESCRIPTION_NEW
         )
 
-        cls.post = Post.objects.create(author=cls.user,
-                                       group=cls.group,
-                                       text='test_text',
-                                       )
-        cls.comment = Comment.objects.create(post=cls.post,
-                                             author=cls.user,
-                                             text='test_comment')
+        cls.post = Post.objects.create(
+            author=cls.user,
+            group=cls.group,
+            text='test_text',
+        )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=cls.user,
+            text='test_comment'
+        )
 
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
@@ -102,13 +105,14 @@ class PostFormTests(TestCase):
         self.assertEqual(post.group.id, form_data['group'])
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.text, form_data['text'])
-        self.assertTrue(post.image)
+        self.assertEqual(self.post.image, self.post.image)
 
     def test_edit_post(self):
         '''Проверяется редактирование поста через форму на странице.'''
         form_data_new = {
-            'text': self.post.text,
-            'group': self.group_new.id
+            'text': 'test_text',
+            'group': self.group_new.id,
+            'image': self.image
         }
         response = self.authorized_client.post(self.POST_EDIT_URL,
                                                data=form_data_new,
@@ -117,7 +121,7 @@ class PostFormTests(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.group_new.id, form_data_new['group'])
         self.assertEqual(self.post.text, form_data_new['text'])
-        self.assertEqual(self.post.author, self.user)
+        self.assertEqual(self.post.image, self.post.image)
 
     def test_post_create_and_edit_page_show_correct_context(self):
         '''Проверяется добавление/редактирование записи
@@ -138,20 +142,25 @@ class PostFormTests(TestCase):
         '''Проверяется комментирование постов
            авторизированным пользователем.
         '''
-        form_data = {'text': 'test_comment', 'author': self.user}
+        form_data = {'text': 'test_comment'}
         response = self.authorized_client.post(self.POST_COMMENT_URL,
                                                data=form_data,
                                                follow=True)
+        if 'page_obj' in response.context:
+            self.assertEqual(len(response.context['page_obj']), 1)
         self.assertRedirects(response, self.POST_DETAIL_URL)
         comment = Comment.objects.first()
-        self.assertEqual(comment.author, form_data['author'])
         self.assertEqual(comment.post, self.post)
         self.assertEqual(comment.text, form_data['text'])
 
     def test_create_post_by_guest(self):
         '''Проверяется, что аноним не может создать пост.'''
         old_post = copy(self.post)
-        form_data = {'text': 'guest client can not create post'}
+        form_data = {
+            'text': 'guest client can not create post',
+            'group': self.group,
+            'image': self.image
+        }
         response = self.guest_client.post(POST_CREATE_URL,
                                           data=form_data,
                                           follow=True)
@@ -160,22 +169,21 @@ class PostFormTests(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(old_post.text, self.post.text)
         self.assertEqual(old_post.author, self.post.author)
+        self.assertEqual(old_post.group, self.post.group)
+        self.assertEqual(old_post.image, self.post.image)
 
     def test_add_comment_by_guest(self):
         '''Проверяется, что аноним не может добавить комментарий.'''
-        comments_count = Comment.objects.count()
-        form_data = {'text': 'test_comment'}
-        self.guest_client.post(self.POST_COMMENT_URL,
-                               data=form_data,
-                               follow=True,)
-        self.assertEqual(comments_count, Comment.objects.count())
+        response = self.guest_client.get(self.POST_COMMENT_URL)
+        self.assertEqual(response.status_code, 302)
 
     def tes_edit_post_by_guest(self):
         '''Проверяется, что аноним не может редактировать пост.'''
         old = copy(self.post)
         form_data = {
-            'group': self.group.id,
-            'text': 'guest client can not edit post'
+            'group': self.group_new.id,
+            'text': 'guest client can not edit post',
+            'image': self.image
         }
         response = self.guest_client.post(self.POST_EDIT_URL,
                                           data=form_data,
@@ -184,4 +192,24 @@ class PostFormTests(TestCase):
                              LOGIN + '?next=' + self.POST_EDIT_URL)
         self.post.refresh_from_db()
         self.assertEqual(self.post.text, old.text)
+        self.assertEqual(self.post.group, old.group_new)
+        self.assertEqual(self.post.image, self.post.image)
+
+    def test_edit_post_not_author(self):
+        '''Проверяется, что не автор поста
+           не может редактировать этот пост .
+        '''
+        old = copy(self.post)
+        form_data = {
+            'group': self.group.id,
+            'text': 'not author can not edit post',
+            'image': self.image
+        }
+        response = self.editor_client.post(self.POST_EDIT_URL,
+                                           data=form_data,
+                                           follow=True)
+        self.assertRedirects(response, self.POST_DETAIL_URL)
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.text, old.text)
         self.assertEqual(self.post.group, old.group)
+        self.assertEqual(self.post.image, self.post.image)
