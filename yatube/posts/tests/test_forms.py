@@ -9,7 +9,6 @@ from django.test import override_settings
 from django.test import TestCase
 from django.urls import reverse
 
-from django.core.cache import cache
 from django import forms
 from posts.models import Comment
 from posts.models import Group
@@ -73,7 +72,6 @@ class PostFormTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
-        cache.clear()
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
