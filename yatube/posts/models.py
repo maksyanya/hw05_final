@@ -76,7 +76,6 @@ class Comment(models.Model):
         verbose_name_plural = "Комментарии"
 
 
-
 class Follow(models.Model):
     user = models.ForeignKey(
         User,
