@@ -119,7 +119,6 @@ class PostFormTests(TestCase):
         self.assertEqual(self.group_new.id, form_data_new['group'])
         self.assertEqual(self.post.text, form_data_new['text'])
         self.assertEqual(self.post.author, self.user)
-        self.assertTrue(self.post.image, 'posts/small.gif')
 
     def test_post_create_and_edit_page_show_correct_context(self):
         '''Проверяется добавление/редактирование записи
