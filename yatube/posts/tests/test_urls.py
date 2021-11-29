@@ -77,7 +77,7 @@ class PostURLTests(TestCase):
              LOGIN + '?next=' + POST_CREATE_URL],
             [self.POST_EDIT_URL,
              self.guest,
-             LOGIN + '?next=' + self.POST_EDIT_URL],
+             LOGIN + '?next=' + self.POST_EDIT_URL]
         ]
         for url, client, finel_url in cases:
             with self.subTest(url=url, client=client, finel_url=finel_url):
@@ -92,8 +92,7 @@ class PostURLTests(TestCase):
             PROFILE_URL: 'posts/profile.html',
             self.POST_DETAIL_URL: 'posts/post_detail.html',
             POST_CREATE_URL: 'posts/create_post.html',
-            self.POST_EDIT_URL: 'posts/create_post.html',
-            FOLLOW_INDEX_URL: 'posts/follow.html'
+            self.POST_EDIT_URL: 'posts/create_post.html'
         }
         for url, template in templates_url_names.items():
             with self.subTest(url=url):
