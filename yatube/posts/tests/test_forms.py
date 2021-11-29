@@ -66,18 +66,19 @@ class PostFormTests(TestCase):
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
         cls.POST_COMMENT_URL = reverse('posts:add_comment', args=[cls.post.id])
 
+        cls.guest_client = Client()
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
+        cls.editor = User.objects.create(username='not_author')
+        cls.editor_client = Client()
+        cls.editor_client.force_login(cls.editor)
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
-        self.guest_client = Client()
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-        self.editor = User.objects.create(username='not_author')
-        self.editor_client = Client()
-        self.editor_client.force_login(self.editor)
         self.image = SimpleUploadedFile(
             name='small.gif',
             content=SMALL_GIF,
@@ -118,7 +119,7 @@ class PostFormTests(TestCase):
         self.assertEqual(self.group_new.id, form_data_new['group'])
         self.assertEqual(self.post.text, form_data_new['text'])
         self.assertEqual(self.post.author, self.user)
-        self.assertEqual(self.post.image, 'posts/small.gif')
+        self.assertTrue(self.post.image, 'posts/small.gif')
 
     def test_post_create_and_edit_page_show_correct_context(self):
         '''Проверяется добавление/редактирование записи
