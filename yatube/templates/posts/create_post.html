@@ -7,11 +7,7 @@
     <div class="row justify-content-center">
       <div class="col-md-8 p-5">
         <div class="card-header">
-          {% if is_edit %}
-            Редактирование поста
-          {% else %}
-            Новый пост
-          {% endif %}
+          {% if is_edit %}Редактирование поста{% else %}Новый пост{% endif %}
         </div>
         <div class="card-body">
           <form method="post" enctype="multipart/form-data">
@@ -28,6 +24,11 @@
               </div>
             {% endfor %}
             <div class="d-flex justify-content-end">
+              {% for error in form.errors %}
+                <div class="alert alert-danger" role="alert">
+                  {{ error|escape }}
+                </div>
+              {% endfor %}
               <button type="submit" class="btn btn-primary">
                 {% if is_edit %}Сохранить{% else %}Добавить{% endif %}   
               </button>

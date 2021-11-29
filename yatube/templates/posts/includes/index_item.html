@@ -1,0 +1,16 @@
+{% load thumbnail %}
+<ul>
+  <li>
+    <a href="{% url 'posts:profile' post.author.username %}">@{{ post.author.get_full_name }}</a>
+  </li>
+  <li>
+    Дата публикации: {{ post.pub_date|date:"d E Y" }}
+  </li>
+</ul>
+{% thumbnail post.image "960x540" crop="center" upscale=True as im %}
+  <img class="card-img my-2" src="{{ im.url }}">
+{% endthumbnail %}
+<p>{{ post.text|linebreaksbr }}</p> 
+{% if post.group %} 
+  <a href="{% url 'posts:group_posts'  post.group.slug %}">#{{ post.group }} </a>
+{% endif %}

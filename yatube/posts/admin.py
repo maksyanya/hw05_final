@@ -9,9 +9,6 @@ class GroupAdmin(admin.ModelAdmin):
     list_filter = ('slug',)
 
 
-admin.site.register(Group, GroupAdmin)
-
-
 class PostAdmin(admin.ModelAdmin):
     list_display = ('pk', 'text', 'pub_date', 'author', 'group',)
     list_editable = ('group',)
@@ -21,3 +18,4 @@ class PostAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Post, PostAdmin)
+admin.site.register(Group, GroupAdmin)

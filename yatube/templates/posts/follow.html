@@ -2,23 +2,9 @@
 {% load thumbnail %}
 {% block title %}Мои подписки{% endblock %}
 {% block content %}
-{% include 'posts/includes/switcher.html' %}
+{% include 'posts/includes/switcher.html' with follow=True %}
   {% for post in page_obj %}
-    <ul>
-      <li>
-        <a href="{% url 'posts:profile' post.author.username %}">@{{ post.author.get_full_name }}</a>
-      </li>
-      <li>
-        Дата публикации: {{ post.pub_date|date:"d E Y" }}
-      </li>
-    </ul>
-    {% thumbnail post.image "960x540" crop="center" upscale=True as im %}
-      <img class="card-img my-2" src="{{ im.url }}">
-    {% endthumbnail %}
-    <p>{{ post.text|linebreaksbr }}</p> 
-    {% if post.group %} 
-      <a href="{% url 'posts:group_posts'  post.group.slug %}">#{{ post.group }} </a>
-    {% endif %}
+    {% include 'posts/includes/follow_item.html '%}
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %} 
   {% include 'posts/includes/paginator.html' %}

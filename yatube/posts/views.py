@@ -40,13 +40,9 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts = author.posts.all()
     page_obj = get_page(request, posts)
-    if (request.user.is_authenticated
-        and Follow.objects.filter(
-            user=request.user,
-            author=author).exists()):
-        following = True
-    else:
-        following = False
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user,
+        author=author).exists()
     context = {
         'page_obj': page_obj,
         'author': author,
@@ -118,9 +114,8 @@ def add_comment(request, post_id):
 
 @login_required
 def follow_index(request):
-    followings = Follow.objects.filter(
-        user=request.user).values_list('author')
-    post_list = Post.objects.filter(author_id__in=followings)
+    post_list = Post.objects.filter(
+        author__following__user=request.user)
     return render(request, 'posts/follow.html', context={
         'page_obj': get_page(request, post_list)
     })
@@ -128,21 +123,17 @@ def follow_index(request):
 
 @login_required
 def profile_follow(request, username):
+    user = request.user
     author = get_object_or_404(User, username=username)
-    if (
-        author == request.user
-        or Follow.objects.filter(author=author, user=request.user).exists()
-    ):
-        return redirect('posts:profile', username=username)
-    Follow.objects.create(user=request.user, author=author)
+    follow_check = Follow.objects.filter(author=author, user=user).exists()
+    if not follow_check and author != user:
+        Follow.objects.create(user=user, author=author)
     return redirect('posts:profile', username=username)
 
 
 @login_required
 def profile_unfollow(request, username):
-    author = get_object_or_404(User, username=username)
-    follow_check = Follow.objects.filter(user=request.user, author=author)
-    if follow_check:
-        Follow.objects.filter(user=request.user, author=author).exists()
-        follow_check.delete()
+    follower = get_object_or_404(User, username=username)
+    follower = get_object_or_404(Follow, author=follower, user=request.user)
+    follower.delete()
     return redirect('posts:profile', username=username)

@@ -1,0 +1,11 @@
+{% load thumbnail %}
+<h3>
+  Автор: <a href="{% url 'posts:profile' post.author.username %}">{{ post.author.get_full_name }}</a>
+  Дата публикации: {{ post.pub_date|date:"d M Y" }}
+</h3>
+{% thumbnail post.image "960x540" crop="center" upscale=True as im %}
+  <img class="card-img my-2" src="{{ im.url }}">
+{% endthumbnail %}
+<p>
+  {{ post.text|linebreaksbr }}
+</p>

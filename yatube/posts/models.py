@@ -14,12 +14,12 @@ class Group(models.Model):
         blank=True,
         verbose_name='Описание')
 
-    def __str__(self):
-        return self.title
-
     class Meta:
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
+
+    def __str__(self):
+        return self.title
 
 
 class Post(models.Model):
@@ -42,13 +42,13 @@ class Post(models.Model):
         blank=True
     )
 
-    def __str__(self):
-        return self.text[:15]
-
     class Meta:
         ordering = ('-pub_date',)
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
+
+    def __str__(self):
+        return self.text[:15]
 
 
 class Comment(models.Model):
@@ -70,6 +70,14 @@ class Comment(models.Model):
         auto_now_add=True
     )
 
+    class Meta:
+        ordering = ('-created',)
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"
+
+    def __str__(self):
+        return self.text
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
@@ -86,7 +94,7 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        verbose_name='Подписка на автора'
+        verbose_name='Автор'
     )
 
     class Meta:

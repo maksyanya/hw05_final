@@ -24,12 +24,24 @@ TEXT = 'test_text'
 TITLE_ANOTHER = 'another_title'
 SLUG_ANOTHER = 'another_slug'
 DESCRIPTION_OTHER = 'other_description'
+FOLLOWER = 'test_follower'
+SMALL_GIF = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
+             b'\x01\x00\x80\x00\x00\x00\x00\x00'
+             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+             b'\x0A\x00\x3B')
 
 INDEX_URL = reverse('posts:index')
 POST_CREATE_URL = reverse('posts:post_create')
 GROUP_POSTS_URL = reverse('posts:group_posts', kwargs={'slug': SLUG})
 PROFILE_URL = reverse('posts:profile', kwargs={'username': USERNAME})
 ANOTHER_GROUP = reverse('posts:group_posts', kwargs={'slug': SLUG_ANOTHER})
+FOLLOW_INDEX_URL = reverse('posts:follow_index')
+PROFILE_FOLLOW_URL = reverse('posts:profile_follow',
+                             kwargs={'username': FOLLOWER})
+PROFILE_UNFOLLOW_URL = reverse('posts:profile_unfollow',
+                               kwargs={'username': FOLLOWER})
 FOLLOW_INDEX_URL = reverse('posts:follow_index')
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -48,25 +60,11 @@ class PostPagesTests(TestCase):
                                                  slug=SLUG_ANOTHER,
                                                  description=DESCRIPTION_OTHER)
 
-        cls.follower = User.objects.create(username='test_follower')
-        cls.PROFILE_FOLLOW_URL = reverse(
-            'posts:profile_follow',
-            kwargs={'username': cls.follower})
-        cls.PROFILE_UNFOLLOW_URL = reverse(
-            'posts:profile_unfollow',
-            kwargs={'username': cls.follower})
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
+        cls.follower = User.objects.create(username=FOLLOWER)
 
         cls.uploaded = SimpleUploadedFile(
             name='small.gif',
-            content=small_gif,
+            content=SMALL_GIF,
             content_type='image/gif'
         )
 
@@ -78,6 +76,12 @@ class PostPagesTests(TestCase):
         )
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
 
+        cls.guest_client = Client()
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.author)
+        cls.follower_client = Client()
+        cls.follower_client.force_login(cls.follower)
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -85,11 +89,6 @@ class PostPagesTests(TestCase):
 
     def setUp(self):
         cache.clear()
-        self.guest_client = Client()
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.author)
-        self.follower_client = Client()
-        self.follower_client.force_login(self.follower)
 
     def test_show_correct_context(self):
         '''Проверяется контекст шаблонов на соответствие.'''
@@ -148,62 +147,27 @@ class PostPagesTests(TestCase):
         '''Авторизованный пользователь может подписываться
            на других пользователей.
         '''
-        self.authorized_client.post(self.PROFILE_FOLLOW_URL)
-        follow = Follow.objects.first()
-        self.assertEqual(Follow.objects.count(), 1)
-        self.assertEqual(follow.author, self.follower)
-        self.assertEqual(follow.user, self.author)
+        before_follow = Follow.objects.all().count()
+        self.authorized_client.get(PROFILE_FOLLOW_URL)
+        after_follow = Follow.objects.all().count()
+        self.assertNotEqual(before_follow, after_follow)
 
     def test_authorized_user_can_unfollow_from_users(self):
         '''Авторизованный пользователь может отписывается
            от других пользователей.
         '''
         Follow.objects.create(user=self.author, author=self.follower)
-        self.authorized_client.post(self.PROFILE_UNFOLLOW_URL)
-        self.assertEqual(Follow.objects.count(), 0)
-
-    def test_new_posts_on_page_followers(self):
-        '''Новая запись пользователя появляется в ленте тех,
-           кто на него подписан.
-        '''
-        Follow.objects.create(
-            user=self.author,
-            author=self.follower,
-        )
-        form_data = {
-            "text": "test_text",
-            "group": self.group.id,
-            "author": self.follower,
-        }
-        self.follower_client.post(POST_CREATE_URL,
-                                  data=form_data,
-                                  follow=True,
-                                  )
-        first_post = Post.objects.first()
-        response = self.authorized_client.get(FOLLOW_INDEX_URL)
-        post = response.context['page_obj'][0]
-        self.assertEqual(post, first_post)
+        before_unfollow = Follow.objects.all().count()
+        self.authorized_client.get(PROFILE_UNFOLLOW_URL)
+        after_unfollow = Follow.objects.all().count()
+        self.assertNotEqual(before_unfollow, after_unfollow)
 
     def test_new_post_not_show_on_page_unfollowers(self):
         '''Новая запись пользователя не появляется в ленте тех,
-           кто НЕ подписан на него.
+           кто не подписан на него.
         '''
-        Follow.objects.create(
-            user=self.author,
-            author=self.follower,
-        )
-        form_data = {
-            "text": "test_text",
-            "group": self.group.id,
-            "author": self.follower,
-        }
-        self.follower_client.post(POST_CREATE_URL,
-                                  data=form_data,
-                                  follow=True,
-                                  )
-        response = self.follower_client.get(FOLLOW_INDEX_URL)
-        posts = response.context['page_obj']
-        self.assertEqual(len(posts), 0)
+        response_group = self.authorized_client.get(FOLLOW_INDEX_URL)
+        self.assertNotIn(self.post, response_group.context['page_obj'])
 
 
 class PaginatorViewsTest(TestCase):
