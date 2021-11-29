@@ -166,9 +166,9 @@ class PostFormTests(TestCase):
         '''Проверяется, что аноним не может добавить комментарий.'''
         comments_count = Comment.objects.count()
         form_data = {'text': 'test_comment'}
-        response = self.guest_client.post(self.POST_COMMENT_URL,
-                                          data=form_data,
-                                          follow=True,)
+        response = self.authorized_client.post(self.POST_COMMENT_URL,
+                                               data=form_data,
+                                               follow=True,)
         self.assertRedirects(response,
                              (LOGIN + '?next=' + self.POST_COMMENT_URL))
         self.assertEqual(comments_count, Comment.objects.count())
