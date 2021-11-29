@@ -113,12 +113,7 @@ class PostFormTests(TestCase):
         response = self.authorized_client.post(self.POST_EDIT_URL,
                                                data=form_data_new,
                                                follow=True)
-        # post_edit = Post.objects.first()
         self.assertRedirects(response, self.POST_DETAIL_URL)
-        # self.assertEqual(post_edit.group.id, form_data_new['group'])
-        # self.assertEqual(post_edit.text, form_data_new['text'])
-        # self.assertEqual(post_edit.author, self.user)
-        # self.assertEqual(post_edit.image, 'posts/small.gif')
         self.post.refresh_from_db()
         self.assertEqual(self.group_new.id, form_data_new['group'])
         self.assertEqual(self.post.text, form_data_new['text'])
