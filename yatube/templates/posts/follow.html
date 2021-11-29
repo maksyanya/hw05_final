@@ -4,7 +4,7 @@
 {% block content %}
 {% include 'posts/includes/switcher.html' with follow=True %}
   {% for post in page_obj %}
-    {% include 'posts/includes/post.html' %}
+    {% include 'posts/includes/follow_item.html' %}
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %} 
   {% include 'posts/includes/paginator.html' %}
