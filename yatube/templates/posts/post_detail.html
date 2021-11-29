@@ -2,7 +2,7 @@
 {% block title %}Пост{{ one_post.text|truncatechars:30 }}{% endblock %}
 {% block content %}
   <div class="row">
-    {% include 'posts/includes/post_item.html '%}
+    {% include 'posts/includes/post_item.html' %}
     {% include 'posts/includes/comment_item.html' %}
   </div>  
 {% endblock %}

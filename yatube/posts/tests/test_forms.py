@@ -104,7 +104,7 @@ class PostFormTests(TestCase):
         self.assertEqual(post.text, form_data['text'])
         self.assertTrue(post.image)
 
-    def tes_edit_post(self):
+    def test_edit_post(self):
         '''Проверяется редактирование поста через форму на странице.'''
         form_data_new = {
             'text': self.post.text,
@@ -134,7 +134,7 @@ class PostFormTests(TestCase):
                     form_fields = response.context['form'].fields[value]
                     self.assertIsInstance(form_fields, expected)
 
-    def tes_add_comments_authorized_user(self):
+    def test_add_comments_authorized_user(self):
         '''Проверяется комментирование постов
            авторизированным пользователем.
         '''
