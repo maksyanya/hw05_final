@@ -195,7 +195,7 @@ class PostFormTests(TestCase):
         self.assertEqual(self.post.group, old.group_new)
         self.assertEqual(self.post.image, self.post.image)
 
-    def test_edit_post_not_author(self):
+    def tes_edit_post_not_author(self):
         '''Проверяется, что не автор поста
            не может редактировать этот пост .
         '''
