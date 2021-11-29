@@ -48,7 +48,7 @@ class PostURLTests(TestCase):
         cache.clear()
 
     # Проверяется все страницы авторизованных/неавторизованных пользователей
-    def test_all_url_all_user(self):
+    def tes_all_url_all_user(self):
         '''Проверяется по списку урлы всех страниц.'''
         cases = [
             [INDEX_URL, self.guest, 200],
@@ -66,7 +66,7 @@ class PostURLTests(TestCase):
             with self.subTest(url=url, client=client, code=code):
                 self.assertEqual(client.get(url).status_code, code)
 
-    def test_redirect_urls_correct(self):
+    def tes_redirect_urls_correct(self):
         '''Проверяется редирект страниц создания/редактирования поста.'''
         cases = [
             [self.POST_EDIT_URL,
@@ -84,7 +84,7 @@ class PostURLTests(TestCase):
                 self.assertRedirects(client.get(url, follow=True), finel_url)
 
     # Проверяется вызываемые шаблоны для каждого адреса
-    def test_urls_uses_correct_template(self):
+    def tes_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names = {
             INDEX_URL: 'posts/index.html',
