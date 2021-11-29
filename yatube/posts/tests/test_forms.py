@@ -135,19 +135,19 @@ class PostFormTests(TestCase):
                     form_fields = response.context['form'].fields[value]
                     self.assertIsInstance(form_fields, expected)
 
-    def test_add_comments_authorized_user(self):
-        '''Проверяется комментирование постов
-           авторизированным пользователем.
-        '''
-        form_data = {'text': 'test_comment', 'author': self.user}
-        response = self.authorized_client.post(self.POST_COMMENT_URL,
-                                               data=form_data,
-                                               follow=True)
-        self.assertRedirects(response, self.POST_DETAIL_URL)
-        comment = Comment.objects.first()
-        self.assertEqual(comment.author, form_data['author'])
-        self.assertEqual(comment.post, self.post)
-        self.assertEqual(comment.text, form_data['text'])
+    # def test_add_comments_authorized_user(self):
+    #     '''Проверяется комментирование постов
+    #        авторизированным пользователем.
+    #     '''
+    #     form_data = {'text': 'test_comment', 'author': self.user}
+    #     response = self.authorized_client.post(self.POST_COMMENT_URL,
+    #                                            data=form_data,
+    #                                            follow=True)
+    #     self.assertRedirects(response, self.POST_DETAIL_URL)
+    #     comment = Comment.objects.first()
+    #     self.assertEqual(comment.author, form_data['author'])
+    #     self.assertEqual(comment.post, self.post)
+    #     self.assertEqual(comment.text, form_data['text'])
 
     def test_create_post_by_guest(self):
         '''Проверяется, что аноним не может создать пост.'''
