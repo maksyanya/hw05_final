@@ -16,7 +16,9 @@ INDEX_URL = reverse('posts:index')
 GROUP_POSTS_URL = reverse('posts:group_posts', kwargs={'slug': SLUG})
 PROFILE_URL = reverse('posts:profile', kwargs={'username': USERNAME})
 POST_CREATE_URL = reverse('posts:post_create')
-FOLLOW_INDEX_URL = reverse('posts:follow_index')
+FOLLOW_INDEX = reverse('posts:follow_index')
+FOLLOW_URL = reverse('posts:profile_follow', kwargs={'username': USERNAME})
+UNFOLLOW_URL = reverse('posts:profile_unfollow', kwargs={'username': USERNAME})
 UNEXIST_PAGE = '/404/'
 LOGIN = reverse('login')
 
@@ -37,7 +39,6 @@ class PostURLTests(TestCase):
         )
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
-        cls.ADD_COMMENT_URL = reverse('posts:add_comment', args=[cls.post.id])
 
         cls.guest = Client()
         cls.author_ = Client()
@@ -62,14 +63,16 @@ class PostURLTests(TestCase):
             [POST_CREATE_URL, self.guest, 302],
             [self.POST_EDIT_URL, self.guest, 302],
             [self.POST_EDIT_URL, self.another, 302],
-            [FOLLOW_INDEX_URL, self.another, 200]
+            [FOLLOW_INDEX, self.another, 200],
+            [FOLLOW_URL, self.guest, 302],
+            [UNFOLLOW_URL, self.guest, 302]
         ]
         for url, client, code in cases:
             with self.subTest(url=url, client=client, code=code):
                 self.assertEqual(client.get(url).status_code, code)
 
     def test_redirect_urls_correct(self):
-        '''Проверяется редирект страниц создания/редактирования поста.'''
+        '''Проверяется редирект страниц.'''
         cases = [
             [self.POST_EDIT_URL,
              self.another,
@@ -80,13 +83,25 @@ class PostURLTests(TestCase):
             [self.POST_EDIT_URL,
              self.guest,
              LOGIN + '?next=' + self.POST_EDIT_URL],
-            [self.ADD_COMMENT_URL,
+            [FOLLOW_INDEX,
              self.guest,
-             LOGIN + '?next=' + self.ADD_COMMENT_URL],
+             LOGIN + '?next=' + FOLLOW_INDEX],
+            [FOLLOW_URL,
+             self.another,
+             PROFILE_URL],
+            [UNFOLLOW_URL,
+             self.another,
+             PROFILE_URL],
+            [FOLLOW_URL,
+             self.guest,
+             LOGIN + '?next=' + FOLLOW_URL],
+            [UNFOLLOW_URL,
+             self.guest,
+             LOGIN + '?next=' + UNFOLLOW_URL],
         ]
-        for url, client, finel_url in cases:
-            with self.subTest(url=url, client=client, finel_url=finel_url):
-                self.assertRedirects(client.get(url, follow=True), finel_url)
+        for url, client, final_url in cases:
+            with self.subTest(url=url, client=client, final_url=final_url):
+                self.assertRedirects(client.get(url, follow=True), final_url)
 
     # Проверяется вызываемые шаблоны для каждого адреса
     def test_urls_uses_correct_template(self):
@@ -98,7 +113,7 @@ class PostURLTests(TestCase):
             self.POST_DETAIL_URL: 'posts/post_detail.html',
             POST_CREATE_URL: 'posts/create_post.html',
             self.POST_EDIT_URL: 'posts/create_post.html',
-            FOLLOW_INDEX_URL: 'posts/follow.html'
+            FOLLOW_INDEX: 'posts/follow.html'
         }
         for url, template in templates_url_names.items():
             with self.subTest(url=url):
