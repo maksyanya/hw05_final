@@ -183,7 +183,7 @@ class PostFormTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Comment.objects.exists())
 
-    def test_edit_post_by_guest_and_not_author(self):
+    def tes_edit_post_by_guest_and_not_author(self):
         '''Проверяется, что аноним/не автор не может редактировать пост.'''
         old = copy(self.post)
         cases = [
