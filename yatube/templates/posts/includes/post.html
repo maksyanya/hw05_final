@@ -6,7 +6,7 @@
   </li>
   <li>
     Дата публикации: {{ post.pub_date|date:"d E Y" }}
-  </li> 
+  </li>
 </ul>
 <div class="col-6 col-md-3">
   {% thumbnail post.image "960x640" crop="center" upscale=True as im %}
@@ -16,6 +16,35 @@
 <p>
   {{ post.text|linebreaksbr }}
 </p>
+<ul>
+  {% if post.group %} 
+    <li class="col-6 col-md-3">
+      Сообщество: {{post.group}}
+      <br/>
+      <a href="{% url 'posts:group_posts'  post.group.slug %}">
+        все записи сообщества
+      </a>
+    </li>
+  {% endif %}
+  <li class="col-6 col-md-3">
+    Автор: {{ post.author.get_full_name }}
+  </li>
+  <li class="col-6 col-md-3">
+    Всего постов автора: <span>{{ post.author.posts.count }}</span>
+  </li>
+  <li class="col-6 col-md-3">
+    <a href="{% url 'posts:profile' post.author.username %}">
+      все посты автора
+    </a>
+  </li>
+  {% if user == post.author %}
+    <li class="col-6 col-md-3">
+      <a href="{% url 'posts:post_edit' post.id%}">
+        редакторовать пост
+      </a>
+    </li>
+  {% endif %}
+</ul>
 <a href="{% url 'posts:post_detail' post.id %}">подробная информация <br/></a>
 {% if post.group %} 
   <a href="{% url 'posts:group_posts'  post.group.slug %}"> #{{ post.group }} </a>

@@ -183,7 +183,7 @@ class PostFormTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Comment.objects.exists())
 
-    def tes_edit_post_by_guest_and_not_author(self):
+    def test_edit_post_by_guest_and_not_author(self):
         '''Проверяется, что аноним/не автор не может редактировать пост.'''
         old = copy(self.post)
         cases = [
@@ -197,6 +197,7 @@ class PostFormTests(TestCase):
         }
         for client, final_url in cases:
             with self.subTest(client=client, final_url=final_url):
+                original_author = self.post.author
                 response = client.post(self.POST_EDIT_URL,
                                        data=form_data,
                                        follow=True)
@@ -204,4 +205,5 @@ class PostFormTests(TestCase):
                 self.post.refresh_from_db()
                 self.assertEqual(self.post.text, old.text)
                 self.assertEqual(self.post.group, old.group)
-                self.assertTrue(old.image)
+                self.assertEqual(self.post.author, original_author)
+                self.assertEqual(self.post.image, 'posts/small.gif')
