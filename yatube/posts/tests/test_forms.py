@@ -105,7 +105,7 @@ class PostFormTests(TestCase):
         self.assertEqual(post.group.id, form_data['group'])
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.text, form_data['text'])
-        self.assertEqual(self.post.image, 'posts/small.gif')
+        self.assertTrue(post.image)
 
     def test_edit_post(self):
         '''Проверяется редактирование поста через форму на странице.'''
@@ -114,6 +114,7 @@ class PostFormTests(TestCase):
             'group': self.group_new.id,
             'image': self.image
         }
+        original_author = self.post.author
         response = self.authorized_client.post(self.POST_EDIT_URL,
                                                data=form_data_new,
                                                follow=True)
@@ -121,7 +122,7 @@ class PostFormTests(TestCase):
         self.post.refresh_from_db()
         self.assertEqual(self.group_new.id, form_data_new['group'])
         self.assertEqual(self.post.text, form_data_new['text'])
-        self.assertEqual(self.post.author, self.user)
+        self.assertEqual(original_author, self.post.author)
         self.assertEqual(self.post.image, 'posts/small.gif')
 
     def test_post_create_and_edit_page_show_correct_context(self):
@@ -182,24 +183,25 @@ class PostFormTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Comment.objects.exists())
 
-    def tes_edit_post_by_guest_and_not_author(self):
+    def test_edit_post_by_guest_and_not_author(self):
         '''Проверяется, что аноним/не автор не может редактировать пост.'''
+        old = copy(self.post)
         cases = [
             [self.guest_client, LOGIN + '?next=' + self.POST_EDIT_URL],
             [self.editor_client, self.POST_DETAIL_URL]
         ]
-        old = copy(self.post)
         form_data = {
             'group': self.group_new.id,
-            'text': 'guest client can not edit post',
+            'text': 'guest/not author client can not edit post',
             'image': self.image
         }
         for client, final_url in cases:
-            response = self.client.post(self.POST_EDIT_URL,
-                                        data=form_data,
-                                        follow=True)
-            self.assertRedirects(response, final_url)
-            self.post.refresh_from_db()
-            self.assertEqual(self.post.text, old.text)
-            self.assertEqual(self.post.group, old.group_new)
-            self.assertEqual(self.post.image, old.image)
+            with self.subTest(client=client, final_url=final_url):
+                response = client.post(self.POST_EDIT_URL,
+                                       data=form_data,
+                                       follow=True)
+                self.assertRedirects(response, final_url)
+                self.post.refresh_from_db()
+                self.assertEqual(self.post.text, old.text)
+                self.assertEqual(self.post.group, old.group)
+                self.assertTrue(old.image)

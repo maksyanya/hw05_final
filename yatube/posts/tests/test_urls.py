@@ -27,8 +27,8 @@ class PostURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.author = User.objects.create_user(username=USERNAME)
-        cls.not_author = User.objects.create_user(
+        cls.author = User.objects.create(username=USERNAME)
+        cls.not_author = User.objects.create(
             username=NOT_AUTHOR
         )
         cls.group = Group.objects.create(slug=SLUG)
@@ -65,7 +65,10 @@ class PostURLTests(TestCase):
             [self.POST_EDIT_URL, self.another, 302],
             [FOLLOW_INDEX, self.another, 200],
             [FOLLOW_URL, self.guest, 302],
-            [UNFOLLOW_URL, self.guest, 302]
+            [UNFOLLOW_URL, self.guest, 302],
+            [FOLLOW_URL, self.another, 302],
+            [UNFOLLOW_URL, self.another, 302],
+            [FOLLOW_INDEX, self.guest, 302]
         ]
         for url, client, code in cases:
             with self.subTest(url=url, client=client, code=code):
