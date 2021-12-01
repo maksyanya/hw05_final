@@ -32,7 +32,7 @@ def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     return render(request, 'posts/group_list.html', context={
         'page_obj': get_page(request, group.posts.all()),
-        'group': group,
+        'group': group
     })
 
 
@@ -40,8 +40,11 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts = author.posts.all()
     page_obj = get_page(request, posts)
-    following = request.user.is_authenticated and Follow.objects.filter(
-        author=request.user).exists() and author == request.user
+    following = (request.user.is_authenticated
+                 and request.user != author
+                 and Follow.objects.filter(
+                     user=request.user,
+                     author=author).exists())
     context = {
         'page_obj': page_obj,
         'author': author,
